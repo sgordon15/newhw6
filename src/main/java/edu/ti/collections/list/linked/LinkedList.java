@@ -26,22 +26,26 @@ public class LinkedList<T> {
         }
     }
 
-    private Node head = null;
+    private Node headNode = null;
+    Node endNode = null;  //took away "private"
 
     public LinkedList() {
         // nothing
     }
 
     public LinkedList(T payload) {
-        head = new Node(payload);
+        headNode = new Node(payload);
+        endNode = headNode;
     }
 
     public boolean isEmpty() {
-        return (head == null);
+        return (headNode == null);
     }
 
-    private Node end() {
-        Node endNode = head;
+    //entry condition that head is not null
+    //removed "private"
+    Node end() {
+        Node endNode = headNode;
         while (endNode.getNext() != null) {
             endNode = endNode.getNext();
         }
@@ -50,7 +54,7 @@ public class LinkedList<T> {
 
     public int size() {
         int size = 0;
-        for (Node start = head; start != null; start = start.next) {
+        for (Node start = headNode; start != null; start = start.next) {
             size += 1;
         }
         return size;
@@ -58,24 +62,28 @@ public class LinkedList<T> {
 
     public void insert(T object) {
         Node newNode = new Node(object);
-        newNode.setNext(head);
-        head = newNode;
+        newNode.setNext(headNode);
+        if (headNode == null) {
+            endNode = newNode;
+        }
+        headNode = newNode;
     }
 
     public void append(T object) {
         Node newNode = new Node(object);
-        Node endNode = end();
-        if (head == null) {
-            head = newNode;
+        if (headNode == null) {
+            headNode = newNode;
+            endNode = newNode;
         } else {
-            end().setNext(newNode);
+            endNode.setNext(newNode);
+            endNode = newNode;
         }
     }
 
     public T get(int n) {
         T requestedObject = null;
         if (n < size()) {
-            Node requestedNode = head;
+            Node requestedNode = headNode;
             while (n-- > 0) {
                 requestedNode = requestedNode.getNext();
             }
@@ -88,26 +96,29 @@ public class LinkedList<T> {
         T requestedObject = null;
         if (n < size()) {
             Node beforeRequestedNode = null;
-            Node requestedNode = head;
-            while (n-- > 0) {
+            Node requestedNode = headNode;
+            while (n-- > 0) { //goes to requested node
                 beforeRequestedNode = requestedNode;
                 requestedNode = requestedNode.getNext();
             }
-            if (beforeRequestedNode != null) {
-                beforeRequestedNode.setNext(requestedNode.getNext());
-            } else {
-                head  = requestedNode.getNext();
+            if (beforeRequestedNode != null) { //if want to remove node from somewhere in middle of the list
+                beforeRequestedNode.setNext(requestedNode.getNext()); //remove requested node
+            } else {  //if it's the first node in the list that you want to remove
+                headNode = requestedNode.getNext(); //remove first node/change headNode to the next node
             }
             requestedObject = requestedNode.getPayload();
+            if (requestedNode.getNext() == null) {
+                endNode = beforeRequestedNode;                   //recalculate the endNode
+            }
         }
         return requestedObject;
     }
 
     public T remove(T object) {
         T requestedObject = null;
-        if (head != null) {
+        if (headNode != null) {
             Node beforeRequestedNode = null;
-            Node requestedNode = head;
+            Node requestedNode = headNode;
             boolean foundNode = false;
             do {
                 if (requestedNode.getPayload().equals(object)) {
@@ -117,13 +128,15 @@ public class LinkedList<T> {
                     requestedNode = requestedNode.getNext();
                 }
             } while (!foundNode && requestedNode.getNext() != null);
-
-            if (beforeRequestedNode != null) {
-                beforeRequestedNode.setNext(requestedNode.getNext());
-            } else {
-                head  = requestedNode.getNext();
+            if (beforeRequestedNode != null) { //if not deleting first node
+                beforeRequestedNode.setNext(requestedNode.getNext()); //delete requestedNode
+            } else { //if you want to delete the first node from the list
+                headNode = requestedNode.getNext(); //make the second node be the first node
             }
             requestedObject = requestedNode.getPayload();
+            if (requestedNode.getNext() == null) {
+                endNode = beforeRequestedNode;
+            }
         }
         return requestedObject;
     }
